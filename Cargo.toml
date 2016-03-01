@@ -1,0 +1,9 @@
+[package]
+name = "libsmt"
+version = "0.1.0"
+authors = ["Sushant <sushant.dinesh94@gmail.com>",
+		   "Karthik Senthil <karthik.senthil94@gmail.com>"]
+
+[dependencies]
+petgraph = "*"
+regex = "*"
