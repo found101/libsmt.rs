@@ -25,4 +25,5 @@ pub mod logics {
     pub mod qf_bv;
     pub mod qf_aufbv;
     pub mod qf_abv;
+    pub mod lia;
 }
