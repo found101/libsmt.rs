@@ -1,0 +1,46 @@
+sudo: false
+language: rust
+addons:
+  apt:
+    packages:
+      - git
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
+      - make
+rust:
+  - nightly
+  - beta
+  - stable
+os:
+  - linux
+  - osx
+before_script:
+  - |
+    pip install 'travis-cargo<0.2' --user &&
+    export PATH=$HOME/.local/bin:$PATH
+script:
+  - |
+    travis-cargo build &&
+    travis-cargo test &&
+    travis-cargo bench &&
+    travis-cargo --only stable doc
+after_success:
+  - travis-cargo --only stable doc-upload
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update   ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install git   ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install make   ; fi
+  - git clone https://github.com/Z3Prover/z3.git
+  - cd z3
+  - python ./scripts/mk_make.py
+  - cd build
+  - make
+  - export PATH=$PATH:.
+  - cd ../../
+env:
+  global:
+    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
+    - secure: omNjOfgjm4B5HnmGRX4mFSFdzl8fRrGyzbsEoGhIrOtytctCFw8fWqyswXgc8fQWBT553HDaE+CkSTRExmvvqHwMwerWpOItR+ro+xdnSU4Fv2VzIfJfjY04KZh1nEQ2tZMqb3O19DDdwjl+QcIEWtQytD3BZS1ad0bRqvFh0UgR9BmhojSNaUIB9kHlz6T4DL9+wL6VuyLP3ZdusozA/SvdnyFLHdiVY736gEdtz9nyFMBKGTaQgssMQ2Km/jPi0MmVbCajPnWoGFkGmqTvzM1nsQ9edBdNKDT2ZYi2nBsE31f1DbGK8aSqdJtMq5Ggvz86QCVWEt+DnYQYuEEroZxu37roY+CJmDWd7psxsGobuYCk5emH2v5DrfJWPI4SAXP3hN623u2Z4WQ34SWSWT+2wR7vPg/0RYue2ilWM7oP8p6uUXVLrCphs6pnifeu8erkF9BxcIHCRIk+s3bBNbRdAwdDMFRwEZJ9tnSinyuntXEGCTTREYshcqpy3QrtOlMhgsSyJBhNXAQfRU8hE3EAS66/SwI3d3ybDZxutMaoZXEYhLb0qmh3+qAY1o3McpTnLbXZLRwHRPQbV8WMw1IxQn+g6tefOjZ8Idq9/diO+A4vG9Vwu1CHmR6XFyIIkgvqiijXcER+Ihu7iQYYYkE7hfiusHNOm6cqtA3snDk=
+  - secure: csOzhV6zMKH0jNOW2Dn7ueXLrlp/G71TlpABmMcRXCWKP/Nc9lNw5NXfvi23otmp91+3FBYa+RBQa+54o2r4hltMhMtpRqxDb9H3JvqZ/oT05TJO88mONX3IgCXDiJ2aaGopZTpCdS+SR0IKlQzTqTzKSIlQvKgClfiZhgafKeJ/nbIB9MQkr6NX3Xj3nE0yF84DsofSk0a7JauxT3k+F93/tQnebTgQbuL4AaotfOF8a3obrs3m7BWquSRYOIrkH9OhPqm/OopJ44ZPTUyM95aMWI0XqFh3LyJBdfi7w7UMTGinVK3sGS0u420Sv5yNPMv2bdvhvlSD+e/J6puon/HawJukaXWTipdlqOa8+abDDtWXWwx96vH/A+uuJTcmCxtL/+EPmYPeynYFr2UqIVOoUNg/GKqrZBHSJTtNft5exalm9z5B1YjI/6AlOPSSaZ1QqNsbBJG9S5hzS7CzKnaKPyaeQaT9oyBCuEyyCmolBqigmRc+B9xR3CQFsfkTQ6MY9GkwI5FWxRqIl4AdsLzSAtHzk2o2F2X/mtbbIK+x9l0cf4SgbAQn6n9sTQMSwHWPQgiBIakh33rCgmgNkXqkeo72bBs9Rop0HiMWafVi72EGxRe0NJuBYwSBSooZjP86+xQtVw+AGHhvuTkftCmmrmKjgIJNpTHzntki22g=

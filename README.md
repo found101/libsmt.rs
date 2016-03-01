@@ -21,7 +21,7 @@ more than happy to help you out.
 ## Usage Example
 
 Usage examples are available in
-[examples/](https://github.com/sushant94/libsmt.rs/examples)
+[examples/](https://github.com/sushant94/libsmt.rs/tree/master/examples)
 
 ## Todo
 
