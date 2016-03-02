@@ -60,39 +60,6 @@ impl SMTSolver for Solver {
 }
 
 #[derive(Clone, Debug)]
-pub enum NodeData {
-    FreeVar(String, Type),
-    BVOps(bitvec::OpCodes),
-    IntOps(integer::OpCodes),
-    CoreOps(core::OpCodes),
-    Const(u64, usize),
-    BVConst(u64, usize),
-}
-
-impl fmt::Display for NodeData {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match *self {
-            NodeData::FreeVar(ref name, _) => name.clone(),
-            NodeData::BVOps(ref opcode) => opcode.to_string(),
-            NodeData::CoreOps(ref opcode) => opcode.to_string(),
-            NodeData::IntOps(ref opcode) => opcode.to_string(),
-            NodeData::Const(ref val, _) => format!("{}", val),
-            NodeData::BVConst(ref val, ref size) => format!("(_ bv{} {})", val, size),
-        };
-        write!(f, "{}", s)
-    }
-}
-
-impl NodeData {
-    pub fn is_opcode(&self) -> bool {
-        match *self {
-            NodeData::BVOps(_) | NodeData::IntOps(_) | NodeData::CoreOps(_) => true,
-            _ => false,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
 pub enum EdgeData {
     EdgeOrder(usize),
 }
@@ -262,7 +229,7 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
                 decls.push(format!("(declare-fun {} () {})\n", name, ty));
             }
         }
-        // Idxify root nodes and generate the assertion strings.
+        // Identify root nodes and generate the assertion strings.
         let mut assertions = Vec::new();
         for idx in self.gr.node_indices() {
             if self.gr.edges_directed(idx, EdgeDirection::Incoming).collect::<Vec<_>>().is_empty() {
@@ -272,13 +239,7 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
             }
         }
 
-        // Set appropriate logic.
-        //if let Some(ref logic) = self.logic {
-            //self.write(format!("(set-logic {})\n", logic));
-        //}
-
         for w in decls.iter().chain(assertions.iter()) {
-            println!("w: {}", w);
             self.write(w);
         }
 
