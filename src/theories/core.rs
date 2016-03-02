@@ -39,7 +39,7 @@ impl fmt::Display for OpCodes {
     }
 }
 
-impl_smt_node!(OpCodes, define consts []);
+impl_smt_node!(OpCodes, define vars [OpCodes::FreeVar(_)], define consts []);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Sorts {

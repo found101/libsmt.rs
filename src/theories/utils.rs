@@ -4,21 +4,22 @@ use smt::SMTNode;
 
 #[macro_export]
 macro_rules! impl_smt_node {
-    ($fns: ident, define consts [$($c: pat),*]) => {
+    ($fns: ty, define vars [$($variant: pat),*], define consts [$($c: pat),*]) => {
         impl SMTNode for $fns {
             fn is_var(&self) -> bool {
-                if let $fns::FreeVar(_) = *self {
-                    true
-                } else {
-                    false
+                match *self {
+                $(
+                    $variant => true,
+                 )*
+                    _ => false,
                 }
             }
 
             fn is_const(&self) -> bool {
                 match *self {
-                    $(
-                        $c => true,
-                    )*
+                $(
+                    $c => true,
+                )*
                     _ => false,
                 }
             }

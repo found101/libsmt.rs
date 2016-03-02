@@ -240,6 +240,7 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
         }
 
         for w in decls.iter().chain(assertions.iter()) {
+            print!("{}", w);
             self.write(w);
         }
 

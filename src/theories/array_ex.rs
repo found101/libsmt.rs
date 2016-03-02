@@ -5,42 +5,52 @@ use std::fmt;
 use smt::SMTNode;
 
 #[derive(Clone, Debug)]
-pub enum OpCodes {
+pub enum OpCodes<X, Y, Z>
+    where X: fmt::Debug + fmt::Display + Clone,
+          Y: fmt::Debug + fmt::Display + Clone,
+          Z: fmt::Debug + fmt::Display + Clone
+{
     Select,
     Store,
     FreeVar(String),
-    Const(usize),
+    Const(Sorts<X, Y>, Box<Z>),
 }
 
-#[derive(Clone, Debug)]
-pub enum ArrayVar<X, Y>
+impl<X, Y, Z> fmt::Display for OpCodes<X, Y, Z>
 where X: fmt::Debug + fmt::Display + Clone,
-      Y: fmt::Debug + fmt::Display + Clone
-{
-    FreeVar(String, Box<X>, Box<Y>)
-}
-
-#[derive(Clone, Debug)]
-pub enum ArrayConst<X, Y> 
-where X: fmt::Debug + fmt::Display + Clone,
-      Y: fmt::Debug + fmt::Display + Clone
-{
-    Const(Box<X>, Box<Y>),
-}
-
-impl fmt::Display for OpCodes {
+      Y: fmt::Debug + fmt::Display + Clone,
+      Z: fmt::Debug + fmt::Display + Clone {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match *self {
             OpCodes::Select => "select".to_owned(),
             OpCodes::Store => "store".to_owned(),
             OpCodes::FreeVar(ref s) => s.clone(),
-            _ => unimplemented!(),
+            OpCodes::Const(ref arr, ref val) => format!("((as const {}) {})", arr, val),
         };
         write!(f, "{}", s)
     }
 }
 
-impl_smt_node!(OpCodes, define consts [OpCodes::Const(_)]);
+impl<X, Y, Z> SMTNode for OpCodes<X, Y, Z>
+where X: fmt::Debug + fmt::Display + Clone,
+      Z: fmt::Debug + fmt::Display + Clone,
+      Y: fmt::Debug + fmt::Display + Clone {
+
+    fn is_var(&self) -> bool {
+        if let OpCodes::FreeVar(_) = *self {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn is_const(&self) -> bool {
+        match *self {
+            OpCodes::Const(_, _) => true,
+            _ => false,
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum Sorts<X, Y>
@@ -58,5 +68,14 @@ impl<X, Y> fmt::Display for Sorts<X, Y>
             Sorts::Array(ref x, ref y) => format!("(Array {} {})", x, y),
         };
         write!(f, "{}", s)
+    }
+}
+
+impl<X, Y> Sorts<X, Y>
+where X: fmt::Debug + fmt::Display + Clone,
+      Y: fmt::Debug + fmt::Display + Clone
+{
+    pub fn new(idx: X, ty: Y) -> Sorts<X, Y> {
+        Sorts::Array(Box::new(idx), Box::new(ty))
     }
 }

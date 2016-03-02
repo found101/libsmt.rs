@@ -1,3 +1,5 @@
+//! Example showing bitvector and array usage examples
+
 // global _main
 // section .text
 // main:
@@ -19,32 +21,22 @@ extern crate libsmt;
 use libsmt::smt::*;
 use libsmt::ssmt::*;
 use libsmt::theories::{array_ex, bitvec, core};
-use libsmt::theories::integer::OpCodes as IOpCodes;
 use libsmt::logics::qf_abv::QF_ABV;
+use libsmt::logics::qf_abv;
 
 macro_rules! bv_const {
     ($solver: ident, $i: expr, $n: expr) => { $solver.new_const(bitvec::OpCodes::Const($i, $n)) }
 }
 
-macro_rules! new_array {
-    ($solver: ident, $n: expr, $x: ty, $y: ty) => { $solver.new_var(Some($n), array_ex::Sorts::Array($x.into(), $y.into())) };
-    ($solver: ident, $x: ty, $y: ty) => { $solver.new_var(None, array_ex::Sorts::Array($x.into(), $y.into())) };
-}
-
-
 fn main() {
     let mut solver = SMTLib2::new(Solver::Z3, Some(QF_ABV));
-    solver.set_logic();
 
     // Two symbolic vars corresponding to the user inputs.
-    let rdi = solver.new_var(Some("rdi"), bitvec::Sorts::BitVector(64));
-    let rsi = solver.new_var(Some("rsi"), bitvec::Sorts::BitVector(64));
-    let mem = solver.new_var(Some("mem"),
-                             array_ex::Sorts::Array(Box::new(bitvec::Sorts::BitVector(64).into()),
-                                                    Box::new(bitvec::Sorts::BitVector(64).into())));
-    // let mem = new_array!(solver, "mem", bitvec::Sorts::BitVector(64),
-    // bitvec::Sorts::BitVector(64));
-
+    let rdi = solver.new_var(Some("rdi"), qf_abv::bv_sort(64));
+    let rsi = solver.new_var(Some("rsi"), qf_abv::bv_sort(64));
+    let bit_vec_arr = qf_abv::array_sort(qf_abv::bv_sort(64),
+                                         qf_abv::bv_sort(64));
+    let mem = solver.new_var(Some("mem"), bit_vec_arr);
 
     // Consts rbp and rsp.
     let _ = bv_const!(solver, 0x8000, 64);
@@ -53,11 +45,16 @@ fn main() {
     let const_a = bv_const!(solver, 0xA, 64);
     let const_4 = bv_const!(solver, 0x4, 64);
     let const_badcafe = bv_const!(solver, 0xcafebabe, 64);
-    let const_14 = bv_const!(solver, 0xA, 64);
+
+    let arr_const = qf_abv::array_const(qf_abv::bv_sort(64),
+                                        qf_abv::bv_sort(64),
+                                        bitvec::OpCodes::Const(0, 64));
+    let const_mem_0 = solver.new_const(arr_const);
+
+    solver.assert(core::OpCodes::Cmp, &[mem, const_mem_0]);
 
     let buf = solver.assert(bitvec::OpCodes::Bvsub, &[rbp, const_a]);
     let rax = solver.assert(bitvec::OpCodes::Bvadd, &[buf, rdi]);
-    //solver.assert(bitvec::OpCodes::Bvult, &[rdi, const_14]);
 
     let ret_addr = solver.assert(bitvec::OpCodes::Bvadd, &[rbp, const_4]);
 

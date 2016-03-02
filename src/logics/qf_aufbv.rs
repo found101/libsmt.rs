@@ -13,7 +13,7 @@ define_sorts_for_logic!(QF_AUFBV_Sorts,
 define_fns_for_logic!(QF_AUFBV_Fn,
                       BVOps -> bitvec::OpCodes,
                       CoreOps -> core::OpCodes,
-                      ArrayOps -> array_ex::OpCodes
+                      ArrayOps -> array_ex::OpCodes<QF_AUFBV_Sorts, QF_AUFBV_Sorts, QF_AUFBV_Fn>
                       );
 
 define_logic!(QF_AUFBV,
