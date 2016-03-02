@@ -20,6 +20,6 @@ define_logic!(QF_ABV,
               QF_ABV_Fn,
               QF_ABV_Sorts,
               map { QF_ABV_Sorts::BV(_) => bitvec::OpCodes::FreeVar,
-                  QF_ABV_Sorts::ArrayEx(_) => array_ex::OpCodes::FreeVar
+              QF_ABV_Sorts::ArrayEx(_) => array_ex::OpCodes::FreeVar
               }
               );

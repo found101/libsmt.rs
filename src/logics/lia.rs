@@ -15,10 +15,23 @@ define_fns_for_logic!(LIA_Fn,
                       IntOps -> integer::OpCodes
                      );
 
-define_logic!(LIA,
-              LIA_Fn,
-              LIA_Sorts,
-              map {
-                  LIA_Sorts::Int(_) => integer::OpCodes::FreeVar
-              }
-             );
+#[derive(Clone, Copy, Debug)]
+pub struct LIA;
+
+impl fmt::Display for LIA {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", "LIA")
+    }
+}
+
+impl Logic for LIA {
+    type Fns = LIA_Fn;
+    type Sorts = LIA_Sorts;
+
+    fn free_var<T: AsRef<str>>(name: T, ty: LIA_Sorts) -> Self::Fns {
+        let fv = match ty {
+            LIA_Sorts::Int(_) => integer::OpCodes::FreeVar(name.as_ref().to_owned()),
+        };
+        LIA_Fn::IntOps(fv)
+    }
+}
