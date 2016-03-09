@@ -246,7 +246,8 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
 
 #[cfg(test)]
 mod test {
-    use smt::*;
+    use backends::backend::*;
+    use backends::z3::Z3;
     use super::*;
     use theories::bitvec;
     use theories::{core, integer};
@@ -254,20 +255,22 @@ mod test {
 
     #[test]
     fn test_z3_int() {
-        let mut solver = SMTLib2::new(Solver::Z3, Some(lia::LIA));
+        let mut z3: Z3 = Default::default();
+        let mut solver = SMTLib2::new(Some(lia::LIA));
         let x = solver.new_var(Some("X"), integer::Sorts::Int);
         let y = solver.new_var(Some("Y"), integer::Sorts::Int);
         let c = solver.new_const(integer::OpCodes::Const(10));
         solver.assert(core::OpCodes::Cmp, &[x, c]);
         solver.assert(integer::OpCodes::Gt, &[x, y]);
-        let result = solver.solve().unwrap();
+        let result = solver.solve(&mut z3).unwrap();
         assert_eq!(result[&x], 10);
         assert_eq!(result[&y], 9);
     }
 
     #[test]
     fn test_z3_bitvec() {
-        let mut solver = SMTLib2::new(Solver::Z3, Some(qf_bv::QF_BV));
+        let mut z3: Z3 = Default::default();
+        let mut solver = SMTLib2::new(Some(qf_bv::QF_BV));
         let x = solver.new_var(Some("X"), bitvec::Sorts::BitVector(32));
         let c = solver.new_const(bitvec::OpCodes::Const(10, 32));
         let c8 = solver.new_const(bitvec::OpCodes::Const(8, 32));
@@ -275,19 +278,20 @@ mod test {
         solver.assert(core::OpCodes::Cmp, &[x, c]);
         let x_xor_y = solver.assert(bitvec::OpCodes::Bvxor, &[x, y]);
         solver.assert(core::OpCodes::Cmp, &[x_xor_y, c8]);
-        let result = solver.solve().unwrap();
+        let result = solver.solve(&mut z3).unwrap();
         assert_eq!(result[&x], 10);
         assert_eq!(result[&y], 2);
     }
 
     #[test]
     fn test_z3_extract() {
-        let mut solver = SMTLib2::new(Solver::Z3, Some(qf_bv::QF_BV));
+        let mut z3: Z3 = Default::default();
+        let mut solver = SMTLib2::new(Some(qf_bv::QF_BV));
         let x = solver.new_var(Some("X"), bitvec::Sorts::BitVector(32));
         let c4 = solver.new_const(bitvec::OpCodes::Const(0b100, 4));
         let x_31_28 = solver.assert(bitvec::OpCodes::Extract(31, 28), &[x]);
         solver.assert(core::OpCodes::Cmp, &[x_31_28, c4]);
-        let result = solver.solve().unwrap();
+        let result = solver.solve(&mut z3).unwrap();
         assert_eq!(result[&x], (0b100 << 28));
     }
 }

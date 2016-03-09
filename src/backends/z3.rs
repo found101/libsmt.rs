@@ -3,6 +3,7 @@
 use backends::smtlib2::SMTProc;
 use std::process::{Child, Command, Stdio};
 
+#[derive(Default)]
 pub struct Z3 {
     fd: Option<Child>,
 }

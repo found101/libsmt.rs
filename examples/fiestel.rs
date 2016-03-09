@@ -5,16 +5,18 @@
 
 #[macro_use] extern crate libsmt;
 
-use libsmt::smt::*;
-use libsmt::ssmt::*;
+use libsmt::backends::smtlib2::*;
+use libsmt::backends::backend::*;
+use libsmt::backends::z3;
 use libsmt::theories::{bitvec, core};
 use libsmt::logics::qf_abv::QF_ABV;
 use libsmt::logics::qf_abv;
 
 fn main() {
 
+    let mut z3: z3::Z3 = Default::default();
     // Create a new instance of a solver.
-    let mut solver = SMTLib2::new(Solver::Z3, Some(QF_ABV));
+    let mut solver = SMTLib2::new(Some(QF_ABV));
 
     // We need to find the values of the left and right keys. Set these as symbolic.
     let lk = solver.new_var(Some("LK"), qf_abv::bv_sort(24));
@@ -48,13 +50,9 @@ fn main() {
     let _ = solver.assert(core::OpCodes::Cmp, &[rt, rt_const]);
 
     // Print the required keys.
-    if let Ok(result) = solver.solve() {
+    if let Ok(result) = solver.solve(&mut z3) {
         println!("LK: {:x}; RK: {:x}", result[&lk], result[&rk]);
     } else {
         println!("No Solution.");
     }
 }
-
-
-
-

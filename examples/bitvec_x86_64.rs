@@ -18,8 +18,9 @@
 
 extern crate libsmt;
 
-use libsmt::smt::*;
-use libsmt::ssmt::*;
+use libsmt::backends::smtlib2::*;
+use libsmt::backends::backend::*;
+use libsmt::backends::z3;
 use libsmt::theories::{array_ex, bitvec, core};
 use libsmt::logics::qf_abv::QF_ABV;
 use libsmt::logics::qf_abv;
@@ -29,7 +30,8 @@ macro_rules! bv_const {
 }
 
 fn main() {
-    let mut solver = SMTLib2::new(Solver::Z3, Some(QF_ABV));
+    let mut z3: z3::Z3 = Default::default();
+    let mut solver = SMTLib2::new(Some(QF_ABV));
 
     // First we declare all the symbolic vars and constants that are needed in order to check if
     // the program is vulnerable.
@@ -81,7 +83,7 @@ fn main() {
     solver.assert(core::OpCodes::Cmp, &[sel, const_badcafe]);
 
     // Check if we have a satisfying solution.
-    if let Ok(result) = solver.solve() {
+    if let Ok(result) = solver.solve(&mut z3) {
         println!("Out-Of-Bounds Write detected!");
         println!("rdi: 0x{:x}; rsi: 0x{:x};", result[&rdi], result[&rsi]);
     } else {
