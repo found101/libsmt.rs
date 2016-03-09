@@ -13,7 +13,7 @@ format.
 
 ## Documentation
 
-Some documentation exists [here]()
+Some documentation exists [here](http://sushant94.me/libsmt.rs/)
 
 Documentation will be written lazily. This will remain a task of least
 priority until the library is stable and robust. If you are interested in using this
