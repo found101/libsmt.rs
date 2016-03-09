@@ -66,12 +66,12 @@ fn main() {
     // Reset memory to 0
     solver.assert(core::OpCodes::Cmp, &[mem, const_mem_0]);
     // We know that the return address is at rbp + 0x4
-    let ret_addr = solver.assert(bitvec::OpCodes::Bvadd, &[rbp, const_4]);
+    let ret_addr = solver.assert(bitvec::OpCodes::BvAdd, &[rbp, const_4]);
 
     // buf = rbp - 0xa
-    let buf = solver.assert(bitvec::OpCodes::Bvsub, &[rbp, const_a]);
+    let buf = solver.assert(bitvec::OpCodes::BvSub, &[rbp, const_a]);
     // rax = rax + rdi
-    let rax = solver.assert(bitvec::OpCodes::Bvadd, &[buf, rdi]);
+    let rax = solver.assert(bitvec::OpCodes::BvAdd, &[buf, rdi]);
 
     // [rax] = rsi
     let new_mem = solver.assert(array_ex::OpCodes::Store, &[mem, rax, rsi]);

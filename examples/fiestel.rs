@@ -29,15 +29,15 @@ fn main() {
     // Four round fiestel network, iterate and add the corresponding constraints.
     for _ in 0..4 {
         lt = {
-            let leftk_p_rt = solver.assert(bitvec::OpCodes::Bvadd, &[lk, rt]);
-            let rot_res_l = solver.assert(bitvec::OpCodes::Rotate_left(11), &[leftk_p_rt]);
-            solver.assert(bitvec::OpCodes::Bvxor, &[lt, rot_res_l])
+            let leftk_p_rt = solver.assert(bitvec::OpCodes::BvAdd, &[lk, rt]);
+            let rot_res_l = solver.assert(bitvec::OpCodes::RotateLeft(11), &[leftk_p_rt]);
+            solver.assert(bitvec::OpCodes::BvXor, &[lt, rot_res_l])
         };
 
         rt = {
-            let rightk_p_lt = solver.assert(bitvec::OpCodes::Bvadd, &[rk, lt]);
-            let rot_res_l = solver.assert(bitvec::OpCodes::Rotate_left(11), &[rightk_p_lt]);
-            solver.assert(bitvec::OpCodes::Bvxor, &[rt, rot_res_l])
+            let rightk_p_lt = solver.assert(bitvec::OpCodes::BvAdd, &[rk, lt]);
+            let rot_res_l = solver.assert(bitvec::OpCodes::RotateLeft(11), &[rightk_p_lt]);
+            solver.assert(bitvec::OpCodes::BvXor, &[rt, rot_res_l])
         };
     }
 
