@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 use std::fmt;
 
-use smt::SMTNode;
+use backends::backend::SMTNode;
 
 #[macro_export]
 macro_rules! bv_const {

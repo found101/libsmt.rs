@@ -5,7 +5,7 @@ use std::fmt::Debug;
 
 #[macro_use]
 use theories::utils;
-use smt::SMTNode;
+use backends::backend::SMTNode;
 
 #[derive(Clone, Debug)]
 pub enum OpCodes {

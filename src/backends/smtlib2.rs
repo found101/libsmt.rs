@@ -12,116 +12,37 @@ use regex::Regex;
 use petgraph::graph::{Graph, NodeIndex};
 use petgraph::EdgeDirection;
 
-use smt::{Logic, SMTBackend, SMTError, SMTResult, Type, SMTNode};
+use backends::backend::{Logic, SMTBackend, SMTError, SMTNode, SMTResult};
 use theories::{bitvec, core, integer};
 
-/// Enum that contains the solvers that support SMTLib2 format.
-#[derive(Debug, Clone, Copy)]
-pub enum Solver {
-    Z3,
-}
+/// Trait that needs to be implemented in order to support a new solver. `SMTProc` is short for
+/// "SMT Process".
+///
+/// To support a new solver that accepts input in the standard SMTLIB2 format, it is sufficient to
+/// implement this trait for the struct. This trait describes method needed to spawn, and
+/// communicate (read / write) with the solver.
+///
+/// `read` and `write` methods are implemented by deafult and needs to be changed only if the
+/// mode of communication is different (other than process pipes), or if some custom functionality
+/// is required for the specific solver.
+pub trait SMTProc {
+    /// Function to initialize the solver. This includes spawning a process and keeping the process
+    /// pipe open for read and write. The function takes &mut self as an argument to allow
+    /// configuration during initialization.
+    fn init(&mut self);
+    /// Return a mutable reference to the process pipe.
+    fn pipe<'a>(&'a mut self) -> &'a mut Child;
 
-/// Trait an actual backend solver must implement in order to be compatible with SMTLib2
-pub trait SMTSolver {
-    /// Return the string representation of the name of the solver.
-    /// This is used to distinguish between the solver and make decisions based on their varied
-    /// capabilities.
-    fn name(&self) -> String;
-    /// Shell command to be executed in order to invoke the solver.
-    /// Note that the solver must support smtlib2 format in order to be compatible.
-    /// This function should return a tuple of shell command and the arguments to be passed to it.
-    fn exec_str(&self) -> (String, Vec<String>);
-    /// Run the solver and keep it open for further IO.
-    fn exec(&self) -> Child {
-        let (cmd, args) = self.exec_str();
-        Command::new(cmd)
-            .args(&args)
-            .stdout(Stdio::piped())
-            .stdin(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("Failed to spawn process")
-    }
-}
-
-impl SMTSolver for Solver {
-    fn exec_str(&self) -> (String, Vec<String>) {
-        match *self {
-            Solver::Z3 => ("z3".to_owned(), vec!["-in".to_owned(), "-smt2".to_owned()]),
-        }
-    }
-
-    fn name(&self) -> String {
-        match *self {
-            Solver::Z3 => "Z3",
-        }
-        .to_owned()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum EdgeData {
-    EdgeOrder(usize),
-}
-
-pub const RHS: usize = 1;
-pub const LHS: usize = 0;
-
-/// Solver struct that wraps the spawned sub-process.
-pub struct SMTLib2<T: Logic> {
-    solver: Option<Child>,
-    logic: Option<T>,
-    gr: Graph<T::Fns, EdgeData>,
-    var_index: usize,
-    var_map: HashMap<String, (NodeIndex, T::Sorts)>,
-    idx_map: HashMap<NodeIndex, String>,
-}
-
-impl<L: Logic> SMTLib2<L> {
-    pub fn new<T: SMTSolver>(s_type: T, logic: Option<L>) -> SMTLib2<L> {
-        let mut solver = SMTLib2 {
-            solver: Some(s_type.exec()),
-            logic: logic,
-            gr: Graph::new(),
-            var_index: 0,
-            var_map: HashMap::new(),
-            idx_map: HashMap::new(),
-        };
-
-        // TODO: Re-enable success message.
-        // solver.write("(set-option :print-success true)\n");
-        solver
-    }
-
-    pub fn write<T: AsRef<str>>(&mut self, s: T) -> Result<(), String> {
+    fn write<T: AsRef<str>>(&mut self, s: T) -> Result<(), String> {
         // TODO: Check for errors.
-        if let Some(ref mut stdin) = self.solver.as_mut().unwrap().stdin.as_mut() {
+        if let Some(ref mut stdin) = self.pipe().stdin.as_mut() {
             stdin.write(s.as_ref().as_bytes()).expect("Write to stdin failed");
             stdin.flush().expect("Failed to flush stdin");
         }
         Ok(())
     }
 
-    pub fn read_until(&mut self, delimiter: &str) -> String {
-        let mut s = String::new();
-        let mut bytes_read = [0; 1];
-        if let Some(ref mut solver) = self.solver.as_mut() {
-            if let Some(ref mut stdout) = solver.stdout.as_mut() {
-                loop {
-                    let n = stdout.read(&mut bytes_read).unwrap();
-                    s = format!("{}{}",
-                                s,
-                                String::from_utf8(bytes_read[0..n].to_vec()).unwrap());
-                    if let Some(_) = s.find(delimiter) {
-                        break;
-                    }
-                }
-            }
-        }
-        s
-    }
-
-    pub fn read(&mut self) -> String {
+    fn read(&mut self) -> String {
         // XXX: This read may block indefinitely if there is nothing on the pipe to be
         // read. To prevent this we need a timeout mechanism after which we should
         // return with
@@ -133,20 +54,46 @@ impl<L: Logic> SMTLib2<L> {
         // (when none is available) indefinitely.
         let mut bytes_read = [0; 2048];
         let mut s = String::new();
-        if let Some(ref mut solver) = self.solver.as_mut() {
-            if let Some(ref mut stdout) = solver.stdout.as_mut() {
-                loop {
-                    let n = stdout.read(&mut bytes_read).unwrap();
-                    s = format!("{}{}",
-                                s,
-                                String::from_utf8(bytes_read[0..n].to_vec()).unwrap());
-                    if n < 2048 {
-                        break;
-                    }
+        let solver = self.pipe();
+        if let Some(ref mut stdout) = solver.stdout.as_mut() {
+            loop {
+                let n = stdout.read(&mut bytes_read).unwrap();
+                s = format!("{}{}",
+                            s,
+                            String::from_utf8(bytes_read[0..n].to_vec()).unwrap());
+                if n < 2048 {
+                    break;
                 }
             }
         }
         s
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum EdgeData {
+    EdgeOrder(usize),
+}
+
+#[derive(Clone, Debug)]
+pub struct SMTLib2<T: Logic> {
+    logic: Option<T>,
+    gr: Graph<T::Fns, EdgeData>,
+    var_index: usize,
+    var_map: HashMap<String, (NodeIndex, T::Sorts)>,
+    idx_map: HashMap<NodeIndex, String>,
+}
+
+impl<L: Logic> SMTLib2<L> {
+    pub fn new(logic: Option<L>) -> SMTLib2<L> {
+        let mut solver = SMTLib2 {
+            logic: logic,
+            gr: Graph::new(),
+            var_index: 0,
+            var_map: HashMap::new(),
+            idx_map: HashMap::new(),
+        };
+        solver
     }
 
     // Recursive function that builds up the assertion string from the tree.
@@ -204,10 +151,12 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
         idx
     }
 
-    fn set_logic(&mut self) {
-        if self.logic.is_none() { return; }
+    fn set_logic<S: SMTProc>(&mut self, smt_proc: &mut S) {
+        if self.logic.is_none() {
+            return;
+        }
         let logic = self.logic.unwrap().clone();
-        self.write(format!("(set-logic {})\n", logic));
+        smt_proc.write(format!("(set-logic {})\n", logic));
     }
 
     fn assert<T: Into<L::Fns>>(&mut self, assert: T, ops: &[Self::Idx]) -> Self::Idx {
@@ -219,7 +168,7 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
         assertion
     }
 
-    fn check_sat(&mut self) -> bool {
+    fn check_sat<S: SMTProc>(&mut self, smt_proc: &mut S) -> bool {
         // Write out all variable definitions.
         let mut decls = Vec::new();
         for (name, val) in &self.var_map {
@@ -241,11 +190,11 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
 
         for w in decls.iter().chain(assertions.iter()) {
             print!("{}", w);
-            self.write(w);
+            smt_proc.write(w);
         }
 
-        self.write("(check-sat)\n".to_owned());
-        if &self.read() == "sat\n" {
+        smt_proc.write("(check-sat)\n".to_owned());
+        if &smt_proc.read() == "sat\n" {
             true
         } else {
             false
@@ -253,19 +202,19 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
     }
 
     // TODO: Return type information along with the value.
-    fn solve(&mut self) -> SMTResult<HashMap<Self::Idx, u64>> {
+    fn solve<S: SMTProc>(&mut self, smt_proc: &mut S) -> SMTResult<HashMap<Self::Idx, u64>> {
         let mut result = HashMap::new();
-        if !self.check_sat() {
+        if !self.check_sat(smt_proc) {
             return Err(SMTError::Unsat);
         }
 
-        self.write("(get-model)\n".to_owned());
+        smt_proc.write("(get-model)\n".to_owned());
         // XXX: For some reason we need two reads here in order to get the result from
         // the SMT solver. Need to look into the reason for this. This might stop
         // working in the
         // future.
-        let _ = self.read();
-        let read_result = self.read();
+        let _ = smt_proc.read();
+        let read_result = smt_proc.read();
 
         // Example of result from the solver:
         // (model
@@ -293,39 +242,6 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
         }
         Ok(result)
     }
-
-    fn raw_write<T: AsRef<str>>(&mut self, w: T) {
-        self.write(w);
-    }
-
-    fn raw_read(&mut self) -> String {
-        self.read()
-    }
-}
-
-/// A trait that is to be implemented on a struct that configures and spawns an SMTBackend.
-pub trait SMTInit {
-    type For: SMTBackend;
-    fn spawn(&self) -> Option<Self::For>;
-}
-
-/// Wrapper struct that is used to spawn an instance of Z3 and wrap it into a `SMTLib2`.
-///
-/// This provides a nice way to configure solvers before spawning an instance of it and a chance to
-/// run commands in the solver before they are used elsewhere.
-///
-/// __TODO__: This has to be expanded to other solvers.
-pub struct SpawnZ3;
-impl SpawnZ3 {
-    pub fn new() -> SpawnZ3 {
-        SpawnZ3
-    }
-}
-
-impl<T: Logic> SMTInit<For = SMTLib2<T>> {
-    fn spawn(&self) -> Option<SMTLib2<T>> {
-        Some(SMTLib2::new(Solver::Z3, None))
-    }
 }
 
 #[cfg(test)]
@@ -333,7 +249,7 @@ mod test {
     use smt::*;
     use super::*;
     use theories::bitvec;
-    use theories::{integer, core};
+    use theories::{core, integer};
     use logics::{lia, qf_bv};
 
     #[test]

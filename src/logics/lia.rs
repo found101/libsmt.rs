@@ -5,7 +5,7 @@
 use std::fmt;
 
 use theories::{integer, core};
-use smt::{Logic, SMTNode};
+use backends::backend::{Logic, SMTNode};
 
 define_sorts_for_logic!(LIA_Sorts,
                   Int -> integer::Sorts,

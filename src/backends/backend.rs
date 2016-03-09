@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::fmt;
 
 use theories::core;
-use ssmt::SMTInit;
+use backends::smtlib2::SMTProc;
 
 #[derive(Clone, Debug)]
 pub enum SMTError {
@@ -15,43 +15,7 @@ pub enum SMTError {
     AssertionError(String),
 }
 
-#[derive(Clone, Debug)]
-pub enum Type {
-    Int,
-    BitVector(usize),
-    Array(Box<Type>, Box<Type>),
-    Float,
-    Bool,
-}
-
-impl fmt::Display for Type {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match *self {
-            Type::Int => "Int".to_owned(),
-            Type::BitVector(n) => format!("(_ BitVec {})", n),
-            Type::Array(ref idx, ref ty) => format!("(Array {} {})", idx, ty),
-            Type::Float => unimplemented!(),
-            Type::Bool => "Bool".to_owned(),
-        };
-        write!(f, "{}", s)
-    }
-}
-
 pub type SMTResult<T> = Result<T, SMTError>;
-
-/// Trait to be implemented by `Context` to support SMT Solving.
-pub trait SMT {
-    /// Indexing mechanism that allows the outside world to refer to the variables inside the
-    /// context.
-    type Idx: Clone + Debug;
-
-    /// Return one solution
-    fn solve_for<B: SMTInit>(&Self::Idx, &mut B) -> SMTResult<u64>;
-    /// Repeatedly query the SMT solver to obtain all possible solutions for a set of constraints.
-    fn solve_all_for<B: SMTInit>(&Self::Idx, &mut B) -> SMTResult<Vec<u64>>;
-    /// Check if the constraints are satisfiable.
-    fn check_sat<B: SMTInit>(&mut self, &mut B) -> SMTResult<bool>;
-}
 
 /// Trait a backend should implement to support SMT solving.
 ///
@@ -78,7 +42,7 @@ pub trait SMTBackend {
     type Idx: Debug + Clone;
     type Logic: Logic;
 
-    fn set_logic(&mut self);
+    fn set_logic<S: SMTProc>(&mut self, &mut S);
     //fn declare_fun<T: AsRef<str>>(&mut self, Option<T>, Option<Vec<Type>>, Type) -> Self::Idx;
 
     fn new_var<T, P>(&mut self, Option<T>, P) -> Self::Idx
@@ -86,11 +50,8 @@ pub trait SMTBackend {
               P: Into<<<Self as SMTBackend>::Logic as Logic>::Sorts>;
 
     fn assert<T: Into<<<Self as SMTBackend>::Logic as Logic>::Fns>>(&mut self, T, &[Self::Idx]) -> Self::Idx;
-    fn check_sat(&mut self) -> bool;
-    fn solve(&mut self) -> SMTResult<HashMap<Self::Idx, u64>>;
-
-    fn raw_write<T: AsRef<str>>(&mut self, T);
-    fn raw_read(&mut self) -> String;
+    fn check_sat<S: SMTProc>(&mut self, &mut S) -> bool;
+    fn solve<S: SMTProc>(&mut self, &mut S) -> SMTResult<HashMap<Self::Idx, u64>>;
 }
 
 pub trait Logic: fmt::Display + Clone + Copy {
