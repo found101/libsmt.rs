@@ -1,5 +1,7 @@
 # libsmt.rs
 
+[![Build Status](https://travis-ci.org/sushant94/libsmt.rs.svg?branch=master)](https://travis-ci.org/sushant94/libsmt.rs)
+
 Rust bindings for SMTLIB2
 
 libsmt.rs allows developers to write and interact with SMT Solvers that
