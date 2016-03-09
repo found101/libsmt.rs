@@ -1,4 +1,5 @@
-sudo: false
+sudo: true
+dist: trusty
 language: rust
 addons:
   apt:
@@ -8,14 +9,22 @@ addons:
       - libelf-dev
       - libdw-dev
       - binutils-dev
-      - make
+      - wget
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - rust: nightly
+
 rust:
   - nightly
   - beta
   - stable
+
 os:
   - linux
-  - osx
+
+
 before_script:
   - |
     pip install 'travis-cargo<0.2' --user &&
@@ -29,16 +38,9 @@ script:
 after_success:
   - travis-cargo --only stable doc-upload
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update   ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install git   ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install make   ; fi
-  - git clone https://github.com/Z3Prover/z3.git
-  - cd z3
-  - python ./scripts/mk_make.py
-  - cd build
-  - make
-  - export PATH=$PATH:.
-  - cd ../../
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget "https://github.com/Z3Prover/z3/releases/download/z3-4.4.1/z3-4.4.1-x64-ubuntu-14.04.zip" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then unzip z3-4.4.1-x64-ubuntu-14.04.zip ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export PATH=$PATH:./z3-4.4.1-x64-ubuntu-14.04/bin/ ; fi
 env:
   global:
     - TRAVIS_CARGO_NIGHTLY_FEATURE=""
