@@ -46,9 +46,9 @@ fn main() {
 
     // Defining the assert conditions
     let cond1 = solver.assert(integer::OpCodes::Add, &[x, y]);
-    let cond2 = solver.assert(integer::OpCodes::Gt, &[cond1, int5]);
-    let cond3 = solver.assert(integer::OpCodes::Gt, &[x, int1]); 
-    let cond4 = solver.assert(integer::OpCodes::Gt, &[y, int1]);
+    let _  = solver.assert(integer::OpCodes::Gt, &[cond1, int5]);
+    let _  = solver.assert(integer::OpCodes::Gt, &[x, int1]); 
+    let _  = solver.assert(integer::OpCodes::Gt, &[y, int1]);
 
     if let Ok(result) = solver.solve() {
         println!("x: {}; y: {}", result[&x], result[&y]);

@@ -5,6 +5,11 @@ use std::fmt;
 
 use smt::SMTNode;
 
+#[macro_export]
+macro_rules! bv_const {
+    ($solver: ident, $i: expr, $n: expr) => { $solver.new_const(bitvec::OpCodes::Const($i, $n)) }
+}
+
 #[derive(Clone, Debug)]
 pub enum OpCodes {
     Concat,

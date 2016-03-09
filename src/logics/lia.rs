@@ -4,15 +4,17 @@
 
 use std::fmt;
 
-use theories::{integer};
+use theories::{integer, core};
 use smt::{Logic, SMTNode};
 
 define_sorts_for_logic!(LIA_Sorts,
-                  Int -> integer::Sorts
+                  Int -> integer::Sorts,
+                  Core -> core::Sorts
                  );
 
 define_fns_for_logic!(LIA_Fn,
-                      IntOps -> integer::OpCodes
+                      IntOps -> integer::OpCodes,
+                      CoreOps -> core::OpCodes
                      );
 
 #[derive(Clone, Copy, Debug)]
@@ -31,6 +33,7 @@ impl Logic for LIA {
     fn free_var<T: AsRef<str>>(name: T, ty: LIA_Sorts) -> Self::Fns {
         let fv = match ty {
             LIA_Sorts::Int(_) => integer::OpCodes::FreeVar(name.as_ref().to_owned()),
+            LIA_Sorts::Core(_) => unreachable!(),
         };
         LIA_Fn::IntOps(fv)
     }

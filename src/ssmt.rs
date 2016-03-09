@@ -330,19 +330,20 @@ impl<T: Logic> SMTInit<For = SMTLib2<T>> {
 
 #[cfg(test)]
 mod test {
-    use smt::smt::*;
+    use smt::*;
     use super::*;
-    use smt::{bitvec, integer};
-    use petgraph::graph::NodeIndex;
+    use theories::bitvec;
+    use theories::{integer, core};
+    use logics::{lia, qf_bv};
 
     #[test]
     fn test_z3_int() {
-        let mut solver = SMTLib2::new(Solver::Z3);
-        let x: NodeIndex = solver.new_var::<String>(None, Type::Int);
-        let y: NodeIndex = solver.new_var::<String>(None, Type::Int);
-        let c = solver.new_const(10, Type::Int);
-        solver.assert(NodeData::IntOps(integer::OpCodes::Cmp), &[x, c]);
-        solver.assert(NodeData::IntOps(integer::OpCodes::Gt), &[x, y]);
+        let mut solver = SMTLib2::new(Solver::Z3, Some(lia::LIA));
+        let x = solver.new_var(Some("X"), integer::Sorts::Int);
+        let y = solver.new_var(Some("Y"), integer::Sorts::Int);
+        let c = solver.new_const(integer::OpCodes::Const(10));
+        solver.assert(core::OpCodes::Cmp, &[x, c]);
+        solver.assert(integer::OpCodes::Gt, &[x, y]);
         let result = solver.solve().unwrap();
         assert_eq!(result[&x], 10);
         assert_eq!(result[&y], 9);
@@ -350,15 +351,14 @@ mod test {
 
     #[test]
     fn test_z3_bitvec() {
-        let mut solver = SMTLib2::new(Solver::Z3);
-        solver.set_logic(Logic::QF_BV);
-        let x = solver.new_var(Some("X"), Type::BitVector(32));
-        let c = solver.new_const(10, Type::BitVector(32));
-        let c8 = solver.new_const(8, Type::BitVector(32));
-        let y = solver.new_var(Some("Y"), Type::BitVector(32));
-        solver.assert(NodeData::IntOps(integer::OpCodes::Cmp), &[x, c]);
-        let x_xor_y = solver.assert(NodeData::BVOps(bitvec::OpCodes::bvxor), &[x, y]);
-        solver.assert(NodeData::IntOps(integer::OpCodes::Cmp), &[x_xor_y, c8]);
+        let mut solver = SMTLib2::new(Solver::Z3, Some(qf_bv::QF_BV));
+        let x = solver.new_var(Some("X"), bitvec::Sorts::BitVector(32));
+        let c = solver.new_const(bitvec::OpCodes::Const(10, 32));
+        let c8 = solver.new_const(bitvec::OpCodes::Const(8, 32));
+        let y = solver.new_var(Some("Y"), bitvec::Sorts::BitVector(32));
+        solver.assert(core::OpCodes::Cmp, &[x, c]);
+        let x_xor_y = solver.assert(bitvec::OpCodes::Bvxor, &[x, y]);
+        solver.assert(core::OpCodes::Cmp, &[x_xor_y, c8]);
         let result = solver.solve().unwrap();
         assert_eq!(result[&x], 10);
         assert_eq!(result[&y], 2);
@@ -366,12 +366,11 @@ mod test {
 
     #[test]
     fn test_z3_extract() {
-        let mut solver = SMTLib2::new(Solver::Z3);
-        solver.set_logic(Logic::QF_BV);
-        let x = solver.new_var(Some("X"), Type::BitVector(32));
-        let c4 = solver.new_const(4, Type::BitVector(4));
-        let x_31_28 = solver.assert(NodeData::BVOps(bitvec::OpCodes::extract(31, 28)), &[x]);
-        solver.assert(NodeData::IntOps(integer::OpCodes::Cmp), &[x_31_28, c4]);
+        let mut solver = SMTLib2::new(Solver::Z3, Some(qf_bv::QF_BV));
+        let x = solver.new_var(Some("X"), bitvec::Sorts::BitVector(32));
+        let c4 = solver.new_const(bitvec::OpCodes::Const(0b100, 4));
+        let x_31_28 = solver.assert(bitvec::OpCodes::Extract(31, 28), &[x]);
+        solver.assert(core::OpCodes::Cmp, &[x_31_28, c4]);
         let result = solver.solve().unwrap();
         assert_eq!(result[&x], (0b100 << 28));
     }
