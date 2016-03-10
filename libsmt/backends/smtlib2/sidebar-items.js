@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["EdgeData",""]],"struct":[["SMTLib2",""]],"trait":[["SMTProc","Trait that needs to be implemented in order to support a new solver. `SMTProc` is short for \"SMT Process\"."]]});

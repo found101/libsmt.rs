@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["lia","Module that describes LIA logic."],["qf_abv",""],["qf_aufbv",""],["qf_bv","Module that describes QF_BV (closed quatifier-free formulas built over FixedSizeBitVector) logic."],["utils","Defines macros to build Logics on top of theories."]]});

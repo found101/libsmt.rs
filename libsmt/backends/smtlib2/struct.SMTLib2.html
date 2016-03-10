@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `SMTLib2` struct in crate `libsmt`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SMTLib2">
+
+    <title>libsmt::backends::smtlib2::SMTLib2 - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>libsmt</a>::<wbr><a href='../index.html'>backends</a>::<wbr><a href='index.html'>smtlib2</a></p><script>window.sidebarCurrent = {name: 'SMTLib2', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>libsmt</a>::<wbr><a href='../index.html'>backends</a>::<wbr><a href='index.html'>smtlib2</a>::<wbr><a class='struct' href=''>SMTLib2</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1221' class='srclink' href='../../../src/libsmt/backends/smtlib2.rs.html#79-85' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct SMTLib2&lt;T: <a class='trait' href='../../../libsmt/backends/backend/trait.Logic.html' title='libsmt::backends::backend::Logic'>Logic</a>&gt; {
+    // some fields omitted
+}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;L: <a class='trait' href='../../../libsmt/backends/backend/trait.Logic.html' title='libsmt::backends::backend::Logic'>Logic</a>&gt; <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;L&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(logic: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;L&gt;) -&gt; <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;L&gt;</code></h4>
+<h4 id='method.expand_assertion' class='method'><code>fn <a href='#method.expand_assertion' class='fnname'>expand_assertion</a>(&amp;self, ni: <a class='struct' href='../../../petgraph/graph/struct.NodeIndex.html' title='petgraph::graph::NodeIndex'>NodeIndex</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<h4 id='method.new_const' class='method'><code>fn <a href='#method.new_const' class='fnname'>new_const</a>&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;L::Fns&gt;&gt;(&amp;mut self, cval: T) -&gt; <a class='struct' href='../../../petgraph/graph/struct.NodeIndex.html' title='petgraph::graph::NodeIndex'>NodeIndex</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;L: <a class='trait' href='../../../libsmt/backends/backend/trait.Logic.html' title='libsmt::backends::backend::Logic'>Logic</a>&gt; <a class='trait' href='../../../libsmt/backends/backend/trait.SMTBackend.html' title='libsmt::backends::backend::SMTBackend'>SMTBackend</a> for <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;L&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Idx' class='type'><code>type Idx = <a class='struct' href='../../../petgraph/graph/struct.NodeIndex.html' title='petgraph::graph::NodeIndex'>NodeIndex</a></code></h4>
+<h4 id='assoc_type.Logic' class='type'><code>type Logic = L</code></h4>
+<h4 id='method.new_var' class='method'><code>fn <a href='../../../libsmt/backends/backend/trait.SMTBackend.html#method.new_var' class='fnname'>new_var</a>&lt;T, P&gt;(&amp;mut self, var_name: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;, ty: P) -&gt; Self::<a class='trait' href='../../../libsmt/backends/backend/trait.SMTBackend.html' title='libsmt::backends::backend::SMTBackend'>Idx</a> <span class='where'>where T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;, P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;Self::Logic::Sorts&gt;</span></code></h4>
+<h4 id='method.set_logic' class='method'><code>fn <a href='../../../libsmt/backends/backend/trait.SMTBackend.html#method.set_logic' class='fnname'>set_logic</a>&lt;S: <a class='trait' href='../../../libsmt/backends/smtlib2/trait.SMTProc.html' title='libsmt::backends::smtlib2::SMTProc'>SMTProc</a>&gt;(&amp;mut self, smt_proc: &amp;mut S)</code></h4>
+<h4 id='method.assert' class='method'><code>fn <a href='../../../libsmt/backends/backend/trait.SMTBackend.html#method.assert' class='fnname'>assert</a>&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;L::Fns&gt;&gt;(&amp;mut self, assert: T, ops: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>Self::<a class='trait' href='../../../libsmt/backends/backend/trait.SMTBackend.html' title='libsmt::backends::backend::SMTBackend'>Idx</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; Self::<a class='trait' href='../../../libsmt/backends/backend/trait.SMTBackend.html' title='libsmt::backends::backend::SMTBackend'>Idx</a></code></h4>
+<h4 id='method.check_sat' class='method'><code>fn <a href='../../../libsmt/backends/backend/trait.SMTBackend.html#method.check_sat' class='fnname'>check_sat</a>&lt;S: <a class='trait' href='../../../libsmt/backends/smtlib2/trait.SMTProc.html' title='libsmt::backends::smtlib2::SMTProc'>SMTProc</a>&gt;(&amp;mut self, smt_proc: &amp;mut S) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.solve' class='method'><code>fn <a href='../../../libsmt/backends/backend/trait.SMTBackend.html#method.solve' class='fnname'>solve</a>&lt;S: <a class='trait' href='../../../libsmt/backends/smtlib2/trait.SMTProc.html' title='libsmt::backends::smtlib2::SMTProc'>SMTProc</a>&gt;(&amp;mut self, smt_proc: &amp;mut S) -&gt; <a class='type' href='../../../libsmt/backends/backend/type.SMTResult.html' title='libsmt::backends::backend::SMTResult'>SMTResult</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;Self::<a class='trait' href='../../../libsmt/backends/backend/trait.SMTBackend.html' title='libsmt::backends::backend::SMTBackend'>Idx</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>&gt;&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> + <a class='trait' href='../../../libsmt/backends/backend/trait.Logic.html' title='libsmt::backends::backend::Logic'>Logic</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;T&gt; <span class='where'>where T::Fns: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a>, T::Sorts: <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='../../../libsmt/backends/backend/trait.Logic.html' title='libsmt::backends::backend::Logic'>Logic</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;T&gt; <span class='where'>where T::Fns: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>, T::Sorts: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../libsmt/backends/smtlib2/struct.SMTLib2.html' title='libsmt::backends::smtlib2::SMTLib2'>SMTLib2</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "libsmt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>
