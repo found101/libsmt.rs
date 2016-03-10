@@ -18,8 +18,9 @@
 
 extern crate libsmt;
 
-use libsmt::smt::*;
-use libsmt::ssmt::*;
+use libsmt::backends::smtlib2::*;
+use libsmt::backends::backend::*;
+use libsmt::backends::z3;
 use libsmt::theories::{array_ex, bitvec, core};
 use libsmt::logics::qf_abv::QF_ABV;
 use libsmt::logics::qf_abv;
@@ -29,7 +30,8 @@ macro_rules! bv_const {
 }
 
 fn main() {
-    let mut solver = SMTLib2::new(Solver::Z3, Some(QF_ABV));
+    let mut z3: z3::Z3 = Default::default();
+    let mut solver = SMTLib2::new(Some(QF_ABV));
 
     // First we declare all the symbolic vars and constants that are needed in order to check if
     // the program is vulnerable.
@@ -64,12 +66,12 @@ fn main() {
     // Reset memory to 0
     solver.assert(core::OpCodes::Cmp, &[mem, const_mem_0]);
     // We know that the return address is at rbp + 0x4
-    let ret_addr = solver.assert(bitvec::OpCodes::Bvadd, &[rbp, const_4]);
+    let ret_addr = solver.assert(bitvec::OpCodes::BvAdd, &[rbp, const_4]);
 
     // buf = rbp - 0xa
-    let buf = solver.assert(bitvec::OpCodes::Bvsub, &[rbp, const_a]);
+    let buf = solver.assert(bitvec::OpCodes::BvSub, &[rbp, const_a]);
     // rax = rax + rdi
-    let rax = solver.assert(bitvec::OpCodes::Bvadd, &[buf, rdi]);
+    let rax = solver.assert(bitvec::OpCodes::BvAdd, &[buf, rdi]);
 
     // [rax] = rsi
     let new_mem = solver.assert(array_ex::OpCodes::Store, &[mem, rax, rsi]);
@@ -81,7 +83,7 @@ fn main() {
     solver.assert(core::OpCodes::Cmp, &[sel, const_badcafe]);
 
     // Check if we have a satisfying solution.
-    if let Ok(result) = solver.solve() {
+    if let Ok(result) = solver.solve(&mut z3) {
         println!("Out-Of-Bounds Write detected!");
         println!("rdi: 0x{:x}; rsi: 0x{:x};", result[&rdi], result[&rsi]);
     } else {

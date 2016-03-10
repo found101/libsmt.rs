@@ -2,7 +2,7 @@ use std::fmt::{Display, Debug};
 use std::fmt;
 
 use theories::{array_ex, bitvec, core};
-use smt::{Logic, SMTNode};
+use backends::backend::{Logic, SMTNode};
 
 define_sorts_for_logic!(QF_ABV_Sorts,
                         BV -> bitvec::Sorts,

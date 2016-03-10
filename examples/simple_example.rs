@@ -21,8 +21,9 @@
 // Import the libsmt library
 extern crate libsmt;
 
-use libsmt::smt::*;
-use libsmt::ssmt::*;
+use libsmt::backends::smtlib2::*;
+use libsmt::backends::backend::*;
+use libsmt::backends::z3;
 
 // Include the Int theory and its functions
 use libsmt::theories::{integer};
@@ -32,9 +33,10 @@ use libsmt::logics::lia::LIA;
 
 fn main() {
 
+    let mut z3: z3::Z3 = Default::default();
     // Defining an instance of Z3 solver
-    let mut solver = SMTLib2::new(Solver::Z3, Some(LIA));
-    solver.set_logic();
+    let mut solver = SMTLib2::new(Some(LIA));
+    solver.set_logic(&mut z3);
 
     // Defining the symbolic vars x & y
     let x = solver.new_var(Some("x"),integer::Sorts::Int);
@@ -50,7 +52,7 @@ fn main() {
     let _  = solver.assert(integer::OpCodes::Gt, &[x, int1]); 
     let _  = solver.assert(integer::OpCodes::Gt, &[y, int1]);
 
-    if let Ok(result) = solver.solve() {
+    if let Ok(result) = solver.solve(&mut z3) {
         println!("x: {}; y: {}", result[&x], result[&y]);
     } else {
         println!("No solutions for x and y found for given set of constraints");

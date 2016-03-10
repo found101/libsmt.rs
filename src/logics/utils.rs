@@ -3,7 +3,7 @@
 use std::convert::Into;
 use std::fmt;
 
-use smt::{Logic, SMTNode};
+use backends::backend::{Logic, SMTNode};
 
 #[macro_export]
 macro_rules! define_sorts_for_logic {

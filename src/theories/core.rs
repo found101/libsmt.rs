@@ -3,7 +3,7 @@
 use std::fmt;
 use std::fmt::Debug;
 
-use smt::SMTNode;
+use backends::backend::SMTNode;
 
 #[derive(Clone, Debug)]
 pub enum OpCodes {

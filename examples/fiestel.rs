@@ -5,16 +5,18 @@
 
 #[macro_use] extern crate libsmt;
 
-use libsmt::smt::*;
-use libsmt::ssmt::*;
+use libsmt::backends::smtlib2::*;
+use libsmt::backends::backend::*;
+use libsmt::backends::z3;
 use libsmt::theories::{bitvec, core};
 use libsmt::logics::qf_abv::QF_ABV;
 use libsmt::logics::qf_abv;
 
 fn main() {
 
+    let mut z3: z3::Z3 = Default::default();
     // Create a new instance of a solver.
-    let mut solver = SMTLib2::new(Solver::Z3, Some(QF_ABV));
+    let mut solver = SMTLib2::new(Some(QF_ABV));
 
     // We need to find the values of the left and right keys. Set these as symbolic.
     let lk = solver.new_var(Some("LK"), qf_abv::bv_sort(24));
@@ -27,15 +29,15 @@ fn main() {
     // Four round fiestel network, iterate and add the corresponding constraints.
     for _ in 0..4 {
         lt = {
-            let leftk_p_rt = solver.assert(bitvec::OpCodes::Bvadd, &[lk, rt]);
-            let rot_res_l = solver.assert(bitvec::OpCodes::Rotate_left(11), &[leftk_p_rt]);
-            solver.assert(bitvec::OpCodes::Bvxor, &[lt, rot_res_l])
+            let leftk_p_rt = solver.assert(bitvec::OpCodes::BvAdd, &[lk, rt]);
+            let rot_res_l = solver.assert(bitvec::OpCodes::RotateLeft(11), &[leftk_p_rt]);
+            solver.assert(bitvec::OpCodes::BvXor, &[lt, rot_res_l])
         };
 
         rt = {
-            let rightk_p_lt = solver.assert(bitvec::OpCodes::Bvadd, &[rk, lt]);
-            let rot_res_l = solver.assert(bitvec::OpCodes::Rotate_left(11), &[rightk_p_lt]);
-            solver.assert(bitvec::OpCodes::Bvxor, &[rt, rot_res_l])
+            let rightk_p_lt = solver.assert(bitvec::OpCodes::BvAdd, &[rk, lt]);
+            let rot_res_l = solver.assert(bitvec::OpCodes::RotateLeft(11), &[rightk_p_lt]);
+            solver.assert(bitvec::OpCodes::BvXor, &[rt, rot_res_l])
         };
     }
 
@@ -48,13 +50,9 @@ fn main() {
     let _ = solver.assert(core::OpCodes::Cmp, &[rt, rt_const]);
 
     // Print the required keys.
-    if let Ok(result) = solver.solve() {
+    if let Ok(result) = solver.solve(&mut z3) {
         println!("LK: {:x}; RK: {:x}", result[&lk], result[&rk]);
     } else {
         println!("No Solution.");
     }
 }
-
-
-
-

@@ -1,6 +1,6 @@
 //! Macro helpers for defining theories
 
-use smt::SMTNode;
+use backends::backend::SMTNode;
 
 #[macro_export]
 macro_rules! impl_smt_node {

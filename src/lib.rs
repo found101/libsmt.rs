@@ -1,12 +1,7 @@
-//! Traits, method and structs that represent theories and logics for SMTLIB2
-//!
-//! All notations are directly taken from the SMTLIB2 Standard and mean the same in this context.
+//! Crate that allows rust programs to interact with SMT (Satisfiability Modulo Theory) solvers.
 
 extern crate petgraph;
 extern crate regex;
-
-pub mod smt;
-pub mod ssmt;
 
 pub mod theories {
     #[macro_use] pub mod utils;
@@ -24,4 +19,10 @@ pub mod logics {
     pub mod qf_aufbv;
     pub mod qf_abv;
     pub mod lia;
+}
+
+pub mod backends {
+    pub mod backend;
+    pub mod smtlib2;
+    pub mod z3;
 }
