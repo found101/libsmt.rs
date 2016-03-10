@@ -1,4 +1,4 @@
-//! Module that comtains SMTLib Backend Implementation.
+//! Module that contains SMTLib Backend Implementation.
 //!
 //! This backend outputs the constraints in standard smt-lib2 format. Hence,
 //! any solver that supports this format maybe used to solve for constraints.

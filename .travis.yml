@@ -37,6 +37,7 @@ script:
     travis-cargo --only stable doc
 after_success:
   - travis-cargo --only stable doc-upload
+  - travis-cargo --only stable coveralls --no-sudo --verify 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget "https://github.com/Z3Prover/z3/releases/download/z3-4.4.1/z3-4.4.1-x64-ubuntu-14.04.zip" ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then unzip z3-4.4.1-x64-ubuntu-14.04.zip ; fi

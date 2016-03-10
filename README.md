@@ -1,6 +1,7 @@
 # libsmt.rs
 
 [![Build Status](https://travis-ci.org/sushant94/libsmt.rs.svg?branch=master)](https://travis-ci.org/sushant94/libsmt.rs)
+[![Coverage Status](https://coveralls.io/repos/github/sushant94/libsmt.rs/badge.svg?branch=enable_coveralls)](https://coveralls.io/github/sushant94/libsmt.rs?branch=master)
 
 Rust bindings for SMTLIB2
 
