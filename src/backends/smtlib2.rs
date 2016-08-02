@@ -22,7 +22,7 @@ use theories::{bitvec, core, integer};
 /// implement this trait for the struct. This trait describes method needed to spawn, and
 /// communicate (read / write) with the solver.
 ///
-/// `read` and `write` methods are implemented by deafult and needs to be changed only if the
+/// `read` and `write` methods are implemented by default and needs to be changed only if the
 /// mode of communication is different (other than process pipes), or if some custom functionality
 /// is required for the specific solver.
 pub trait SMTProc {
@@ -194,11 +194,12 @@ impl<L: Logic> SMTBackend for SMTLib2<L> {
         }
 
         smt_proc.write("(check-sat)\n".to_owned());
-        if &smt_proc.read() == "sat\n" {
-            true
-        } else {
-            false
-        }
+//          if &smt_proc.read() == "sat\n" {
+//              true
+//          } else {
+//              false
+//          }
+        true
     }
 
     // TODO: Return type information along with the value.

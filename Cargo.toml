@@ -16,6 +16,10 @@ test = true
 name = "simple_example"
 test = true
 
+[[example]]
+name = "bajr"
+test = true
+
 [dependencies]
 petgraph = "*"
 regex = "*"
